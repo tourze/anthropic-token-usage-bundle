@@ -22,6 +22,7 @@
     "symfony/http-foundation": "^7.3",
     "symfony/http-kernel": "^7.3",
     "symfony/messenger": "^7.3",
+    "symfony/property-access": "^7.3",
     "symfony/routing": "^7.3",
     "symfony/security-core": "^7.3",
     "symfony/security-http": "^7.3",
@@ -30,9 +31,9 @@
     "tourze/access-key-bundle": "0.1.*",
     "tourze/bundle-dependency": "1.*",
     "tourze/doctrine-indexed-bundle": "1.0.*",
-    "tourze/doctrine-snowflake-bundle": "0.1.*",
-    "tourze/doctrine-timestamp-bundle": "0.0.*",
-    "tourze/easy-admin-menu-bundle": "0.1.*",
+    "tourze/doctrine-snowflake-bundle": "1.0.*",
+    "tourze/doctrine-timestamp-bundle": "1.0.*",
+    "tourze/easy-admin-menu-bundle": "1.0.*",
     "tourze/user-service-contracts": "1.*"
   },
   "require-dev": {
@@ -42,7 +43,7 @@
     "symfony/security-bundle": "^7.3",
     "tourze/biz-user-bundle": "0.0.*",
     "tourze/phpunit-doctrine-entity": "1.*",
-    "tourze/phpunit-symfony-kernel-test": "1.*",
+    "tourze/phpunit-symfony-kernel-test": "1.0.*",
     "tourze/phpunit-symfony-unit-test": "1.*",
     "tourze/phpunit-symfony-web-test": "1.*",
     "tourze/symfony-dependency-service-loader": "1.*"
