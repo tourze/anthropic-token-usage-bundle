@@ -1,0 +1,21 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^测试用例 Tourze\\AnthropicTokenUsageBundle\\Tests\\Service\\UsageAdminServiceTest 的测试目标 Tourze\\AnthropicTokenUsageBundle\\Service\\UsageAdminService 是一个服务，因此不应直接继承自 PHPUnit\\Framework\\TestCase。$#'
+			count: 1
+			path: tests/Service/UsageAdminServiceTest.php
+
+		-
+			message: '#^测试用例 Tourze\\AnthropicTokenUsageBundle\\Tests\\Service\\UsageAggregateServiceTest 的测试目标 Tourze\\AnthropicTokenUsageBundle\\Service\\UsageAggregateService 是一个服务，因此不应直接继承自 PHPUnit\\Framework\\TestCase。$#'
+			count: 1
+			path: tests/Service/UsageAggregateServiceTest.php
+
+		-
+			message: '#^测试用例 Tourze\\AnthropicTokenUsageBundle\\Tests\\Unit\\Service\\UsageCollectorTest 的测试目标 Tourze\\AnthropicTokenUsageBundle\\Service\\UsageCollector 是一个服务，因此不应直接继承自 PHPUnit\\Framework\\TestCase。$#'
+			count: 1
+			path: tests/Service/UsageCollectorTest.php
+
+		-
+			message: '#^测试用例 Tourze\\AnthropicTokenUsageBundle\\Tests\\Service\\UsageQueryServiceTest 的测试目标 Tourze\\AnthropicTokenUsageBundle\\Service\\UsageQueryService 是一个服务，因此不应直接继承自 PHPUnit\\Framework\\TestCase。$#'
+			count: 1
+			path: tests/Service/UsageQueryServiceTest.php

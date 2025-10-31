@@ -1,0 +1,327 @@
+{% extends '@base/admin_layout.html.twig' %}
+
+{% block title %}Anthropic Token Usage Overview{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
+    <style>
+        .metric-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #3b82f6;
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        .metric-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .health-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .health-good { background-color: #10b981; }
+        .health-warning { background-color: #f59e0b; }
+        .health-error { background-color: #ef4444; }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 页面标题和过滤器 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Anthropic Token Usage Overview</h1>
+
+        <form method="GET" class="d-flex align-items-center gap-3">
+            <div class="form-group mb-0">
+                <select name="period" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="hour" {{ currentPeriod == 'hour' ? 'selected' : '' }}>Hourly</option>
+                    <option value="day" {{ currentPeriod == 'day' ? 'selected' : '' }}>Daily</option>
+                    <option value="week" {{ currentPeriod == 'week' ? 'selected' : '' }}>Weekly</option>
+                    <option value="month" {{ currentPeriod == 'month' ? 'selected' : '' }}>Monthly</option>
+                </select>
+            </div>
+
+            <div class="form-group mb-0">
+                <input type="date" name="start_date" class="form-control form-control-sm"
+                       value="{{ filter.startDate ? filter.startDate|date('Y-m-d') : '' }}"
+                       onchange="this.form.submit()">
+            </div>
+
+            <div class="form-group mb-0">
+                <input type="date" name="end_date" class="form-control form-control-sm"
+                       value="{{ filter.endDate ? filter.endDate|date('Y-m-d') : '' }}"
+                       onchange="this.form.submit()">
+            </div>
+        </form>
+    </div>
+
+    <!-- 关键指标卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-value">{{ overview.totalTokens|number_format }}</div>
+                <div class="metric-label">Total Tokens</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-value">{{ overview.totalRequests|number_format }}</div>
+                <div class="metric-label">Total Requests</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-value">${{ overview.estimatedCost|number_format(2) }}</div>
+                <div class="metric-label">Estimated Cost</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-value">{{ overview.activeAccessKeys|number_format }}</div>
+                <div class="metric-label">Active Access Keys</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 使用量趋势图表 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Token Usage Trends</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="usageTrendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top 消费者和系统健康 -->
+    <div class="row">
+        <!-- Top Access Keys -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Top Access Keys</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Access Key</th>
+                                    <th class="text-end">Tokens</th>
+                                    <th class="text-end">Requests</th>
+                                    <th class="text-end">Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in topAccessKeys.items %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('anthropic_token_usage_admin_query', {dimension: 'access_key', dimension_id: item.id}) }}"
+                                           class="text-decoration-none">
+                                            {{ item.name|default(item.id|slice(0, 12) ~ '...') }}
+                                        </a>
+                                    </td>
+                                    <td class="text-end">{{ item.totalTokens|number_format }}</td>
+                                    <td class="text-end">{{ item.totalRequests|number_format }}</td>
+                                    <td class="text-end">${{ item.estimatedCost|number_format(2) }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">No data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Users -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Top Users</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th class="text-end">Tokens</th>
+                                    <th class="text-end">Requests</th>
+                                    <th class="text-end">Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in topUsers.items %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('anthropic_token_usage_admin_query', {dimension: 'user', dimension_id: item.id}) }}"
+                                           class="text-decoration-none">
+                                            {{ item.name|default(item.id) }}
+                                        </a>
+                                    </td>
+                                    <td class="text-end">{{ item.totalTokens|number_format }}</td>
+                                    <td class="text-end">{{ item.totalRequests|number_format }}</td>
+                                    <td class="text-end">${{ item.estimatedCost|number_format(2) }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">No data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 系统健康状态 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">System Health</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <span class="health-indicator health-{{ healthMetrics.dataIntegrity >= 95 ? 'good' : (healthMetrics.dataIntegrity >= 90 ? 'warning' : 'error') }}"></span>
+                                <div>
+                                    <div class="fw-bold">Data Integrity</div>
+                                    <div class="text-muted">{{ healthMetrics.dataIntegrity }}%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <span class="health-indicator health-{{ healthMetrics.processingLatency < 100 ? 'good' : (healthMetrics.processingLatency < 500 ? 'warning' : 'error') }}"></span>
+                                <div>
+                                    <div class="fw-bold">Processing Latency</div>
+                                    <div class="text-muted">{{ healthMetrics.processingLatency }}ms</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <span class="health-indicator health-{{ healthMetrics.storageHealth >= 95 ? 'good' : (healthMetrics.storageHealth >= 90 ? 'warning' : 'error') }}"></span>
+                                <div>
+                                    <div class="fw-bold">Storage Health</div>
+                                    <div class="text-muted">{{ healthMetrics.storageHealth }}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <script>
+        // 使用量趋势图表
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('usageTrendsChart').getContext('2d');
+
+            // 从API获取趋势数据
+            fetch('{{ path('anthropic_token_usage_admin_api_trends') }}?' + new URLSearchParams({
+                period: '{{ currentPeriod }}',
+                start_date: '{{ filter.startDate ? filter.startDate|date('Y-m-d') : '' }}',
+                end_date: '{{ filter.endDate ? filter.endDate|date('Y-m-d') : '' }}'
+            }))
+            .then(response => response.json())
+            .then(data => {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.data.labels,
+                        datasets: [
+                            {
+                                label: 'Input Tokens',
+                                data: data.data.inputTokens,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                fill: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Output Tokens',
+                                data: data.data.outputTokens,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                fill: true,
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error loading chart data:', error);
+                document.getElementById('usageTrendsChart').parentElement.innerHTML =
+                    '<div class="text-center text-muted py-4">Failed to load chart data</div>';
+            });
+        });
+    </script>
+{% endblock %}

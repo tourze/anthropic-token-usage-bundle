@@ -1,0 +1,32 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  # Controller自动配置
+  Tourze\AnthropicTokenUsageBundle\Controller\:
+    resource: '../../Controller'
+
+  # Interface自动配置
+  Tourze\AnthropicTokenUsageBundle\Interface\:
+    resource: '../../Interface'
+
+  # Repository服务需要public以支持直接注入
+  Tourze\AnthropicTokenUsageBundle\Repository\:
+    resource: '../../Repository'
+    public: true
+
+  # Service服务需要public以支持外部使用
+  Tourze\AnthropicTokenUsageBundle\Service\:
+    resource: '../../Service'
+    public: true
+
+  # MessageHandler自动配置
+  Tourze\AnthropicTokenUsageBundle\MessageHandler\:
+    resource: '../../MessageHandler'
+    tags: ['messenger.message_handler']
+
+  # EventSubscriber自动配置
+  Tourze\AnthropicTokenUsageBundle\EventSubscriber\:
+    resource: '../../EventSubscriber'

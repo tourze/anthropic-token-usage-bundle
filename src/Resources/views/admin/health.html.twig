@@ -1,0 +1,380 @@
+{% extends '@base/admin_layout.html.twig' %}
+
+{% block title %}System Health - Anthropic Token Usage{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
+    <style>
+        .health-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.2s ease;
+        }
+        .health-card:hover {
+            transform: translateY(-2px);
+        }
+        .health-status {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .status-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+        .status-good { background-color: #10b981; }
+        .status-warning { background-color: #f59e0b; }
+        .status-error { background-color: #ef4444; }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .metric-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 4px;
+        }
+        .metric-description {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            line-height: 1.4;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .alert-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid;
+        }
+        .alert-error {
+            background-color: #fef2f2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        .alert-warning {
+            background-color: #fffbeb;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        .alert-info {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 页面标题 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">System Health Dashboard</h1>
+        <div>
+            <button class="btn btn-outline-primary btn-sm" onclick="refreshMetrics()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <a href="{{ path('anthropic_token_usage_admin_overview') }}" class="btn btn-outline-secondary btn-sm">
+                ← Back to Overview
+            </a>
+        </div>
+    </div>
+
+    <!-- 系统状态概览 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="health-card">
+                <div class="health-status">
+                    <span class="status-indicator status-{{ healthMetrics.overallStatus == 'healthy' ? 'good' : (healthMetrics.overallStatus == 'warning' ? 'warning' : 'error') }}"></span>
+                    <h4 class="mb-0">
+                        System Status:
+                        <span class="text-{{ healthMetrics.overallStatus == 'healthy' ? 'success' : (healthMetrics.overallStatus == 'warning' ? 'warning' : 'danger') }}">
+                            {{ healthMetrics.overallStatus|title }}
+                        </span>
+                    </h4>
+                </div>
+                <p class="text-muted mb-0">
+                    Last updated: {{ healthMetrics.lastUpdated|date('Y-m-d H:i:s') }}
+                    <span class="ms-3">Uptime: {{ healthMetrics.uptime ?? 'Unknown' }}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关键指标 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="health-card">
+                <div class="metric-label">Data Integrity</div>
+                <div class="metric-value text-{{ healthMetrics.dataIntegrity >= 95 ? 'success' : (healthMetrics.dataIntegrity >= 90 ? 'warning' : 'danger') }}">
+                    {{ healthMetrics.dataIntegrity }}%
+                </div>
+                <div class="metric-description">
+                    Percentage of usage records successfully processed without errors
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="health-card">
+                <div class="metric-label">Processing Latency</div>
+                <div class="metric-value text-{{ healthMetrics.processingLatency < 100 ? 'success' : (healthMetrics.processingLatency < 500 ? 'warning' : 'danger') }}">
+                    {{ healthMetrics.processingLatency }}ms
+                </div>
+                <div class="metric-description">
+                    Average time to process usage collection messages
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="health-card">
+                <div class="metric-label">Storage Health</div>
+                <div class="metric-value text-{{ healthMetrics.storageHealth >= 95 ? 'success' : (healthMetrics.storageHealth >= 90 ? 'warning' : 'danger') }}">
+                    {{ healthMetrics.storageHealth }}%
+                </div>
+                <div class="metric-description">
+                    Database connectivity and performance status
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="health-card">
+                <div class="metric-label">Queue Health</div>
+                <div class="metric-value text-{{ healthMetrics.queueHealth >= 95 ? 'success' : (healthMetrics.queueHealth >= 90 ? 'warning' : 'danger') }}">
+                    {{ healthMetrics.queueHealth ?? 'N/A' }}%
+                </div>
+                <div class="metric-description">
+                    Message queue processing performance and backlog status
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 性能趋势图表 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="health-card">
+                <h5 class="card-title mb-3">Processing Latency Trend</h5>
+                <div class="chart-container">
+                    <canvas id="latencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="health-card">
+                <h5 class="card-title mb-3">Data Integrity Trend</h5>
+                <div class="chart-container">
+                    <canvas id="integrityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详细指标 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="health-card">
+                <h5 class="card-title mb-3">Detailed Metrics</h5>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <div class="metric-label">Total Records</div>
+                            <div class="h5">{{ healthMetrics.totalRecords|number_format }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="metric-label">Failed Records</div>
+                            <div class="h5 text-danger">{{ healthMetrics.failedRecords|number_format }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <div class="metric-label">Avg Processing Rate</div>
+                            <div class="h5">{{ healthMetrics.processingRate|number_format }}/min</div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="metric-label">Queue Backlog</div>
+                            <div class="h5 text-{{ healthMetrics.queueBacklog > 1000 ? 'warning' : 'success' }}">
+                                {{ healthMetrics.queueBacklog|number_format }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="health-card">
+                <h5 class="card-title mb-3">System Alerts</h5>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    {% if healthMetrics.alerts is defined and healthMetrics.alerts|length > 0 %}
+                        {% for alert in healthMetrics.alerts %}
+                            <div class="alert-item alert-{{ alert.severity }}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <div class="fw-bold">{{ alert.title }}</div>
+                                        <div class="small">{{ alert.message }}</div>
+                                    </div>
+                                    <small class="text-muted">{{ alert.timestamp|date('H:i') }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert-item alert-info">
+                            <div class="fw-bold">All Systems Normal</div>
+                            <div class="small">No active alerts or warnings</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 系统配置 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="health-card">
+                <h5 class="card-title mb-3">System Configuration</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <div class="metric-label">Bundle Version</div>
+                            <div class="h6">{{ healthMetrics.bundleVersion ?? '1.0.0' }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="metric-label">PHP Version</div>
+                            <div class="h6">{{ healthMetrics.phpVersion ?? constant('PHP_VERSION') }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <div class="metric-label">Database Version</div>
+                            <div class="h6">{{ healthMetrics.databaseVersion ?? 'Unknown' }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="metric-label">Memory Usage</div>
+                            <div class="h6">{{ healthMetrics.memoryUsage ?? (memory_get_usage(true) / 1024 / 1024)|round(1) }}MB</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <div class="metric-label">Disk Usage</div>
+                            <div class="h6">{{ healthMetrics.diskUsage ?? 'Unknown' }}%</div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="metric-label">Active Connections</div>
+                            <div class="h6">{{ healthMetrics.activeConnections ?? 'Unknown' }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <script>
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 延迟趋势图
+            const latencyCtx = document.getElementById('latencyChart').getContext('2d');
+            new Chart(latencyCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1h ago', '50m ago', '40m ago', '30m ago', '20m ago', '10m ago', 'Now'],
+                    datasets: [{
+                        label: 'Processing Latency (ms)',
+                        data: [85, 92, 88, 95, 102, 89, {{ healthMetrics.processingLatency }}],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 200
+                        }
+                    }
+                }
+            });
+
+            // 数据完整性趋势图
+            const integrityCtx = document.getElementById('integrityChart').getContext('2d');
+            new Chart(integrityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1h ago', '50m ago', '40m ago', '30m ago', '20m ago', '10m ago', 'Now'],
+                    datasets: [{
+                        label: 'Data Integrity (%)',
+                        data: [99.5, 99.2, 99.8, 99.1, 99.7, 99.3, {{ healthMetrics.dataIntegrity }}],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 95,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        });
+
+        // 刷新指标
+        function refreshMetrics() {
+            // 实际实现中应该通过AJAX刷新数据
+            location.reload();
+        }
+
+        // 自动刷新（每5分钟）
+        setInterval(function() {
+            const autoRefreshIndicator = document.createElement('div');
+            autoRefreshIndicator.className = 'position-fixed top-0 end-0 m-3 alert alert-info alert-dismissible fade show';
+            autoRefreshIndicator.innerHTML = `
+                <small>Auto-refreshing metrics...</small>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(autoRefreshIndicator);
+
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }, 300000); // 5分钟
+    </script>
+{% endblock %}

@@ -1,0 +1,331 @@
+{% extends '@base/admin_layout.html.twig' %}
+
+{% block title %}Usage Query - Anthropic Token Usage{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .filter-panel {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .stats-summary {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+        .usage-record {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: box-shadow 0.2s;
+        }
+        .usage-record:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .token-breakdown {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 页面标题 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Usage Query</h1>
+        <a href="{{ path('anthropic_token_usage_admin_overview') }}" class="btn btn-outline-secondary">
+            ← Back to Overview
+        </a>
+    </div>
+
+    <!-- 查询过滤器 -->
+    <div class="filter-panel">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="dimension" class="form-label">Dimension</label>
+                <select name="dimension" id="dimension" class="form-select">
+                    <option value="access_key" {{ dimension == 'access_key' ? 'selected' : '' }}>Access Key</option>
+                    <option value="user" {{ dimension == 'user' ? 'selected' : '' }}>User</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="dimension_id" class="form-label">ID</label>
+                <input type="text" name="dimension_id" id="dimension_id" class="form-control"
+                       value="{{ dimensionId }}" placeholder="Enter ID to query">
+            </div>
+
+            <div class="col-md-2">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" name="start_date" id="start_date" class="form-control"
+                       value="{{ queryFilter.startDate ? queryFilter.startDate|date('Y-m-d') : '' }}">
+            </div>
+
+            <div class="col-md-2">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" name="end_date" id="end_date" class="form-control"
+                       value="{{ queryFilter.endDate ? queryFilter.endDate|date('Y-m-d') : '' }}">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary d-block w-100">Query</button>
+            </div>
+        </form>
+
+        <!-- 高级过滤器 -->
+        <div class="row g-3 mt-2">
+            <div class="col-md-4">
+                <label for="models" class="form-label">Models (optional)</label>
+                <select name="models[]" id="models" class="form-select" multiple>
+                    <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                    <option value="claude-3-haiku">Claude 3 Haiku</option>
+                    <option value="claude-3-opus">Claude 3 Opus</option>
+                    <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
+                </select>
+                <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple</small>
+            </div>
+
+            <div class="col-md-4">
+                <label for="features" class="form-label">Features (optional)</label>
+                <select name="features[]" id="features" class="form-select" multiple>
+                    <option value="chat_completion">Chat Completion</option>
+                    <option value="text_generation">Text Generation</option>
+                    <option value="code_analysis">Code Analysis</option>
+                    <option value="document_analysis">Document Analysis</option>
+                </select>
+                <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple</small>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                    Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% if statistics %}
+        <!-- 统计摘要 -->
+        <div class="stats-summary">
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ statistics.totalTokens|number_format }}</div>
+                        <div class="stat-label">Total Tokens</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ statistics.totalInputTokens|number_format }}</div>
+                        <div class="stat-label">Input Tokens</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ statistics.totalOutputTokens|number_format }}</div>
+                        <div class="stat-label">Output Tokens</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ statistics.totalRequests|number_format }}</div>
+                        <div class="stat-label">Requests</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-value">${{ statistics.estimatedCost|number_format(2) }}</div>
+                        <div class="stat-label">Est. Cost</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ statistics.averageTokensPerRequest|number_format(1) }}</div>
+                        <div class="stat-label">Avg/Request</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导出按钮 -->
+        <div class="mb-3">
+            <form method="POST" action="{{ path('anthropic_token_usage_admin_export') }}" class="d-inline">
+                <input type="hidden" name="dimension" value="{{ dimension }}">
+                <input type="hidden" name="dimension_id" value="{{ dimensionId }}">
+                <input type="hidden" name="start_date" value="{{ queryFilter.startDate ? queryFilter.startDate|date('Y-m-d') : '' }}">
+                <input type="hidden" name="end_date" value="{{ queryFilter.endDate ? queryFilter.endDate|date('Y-m-d') : '' }}">
+
+                <div class="btn-group" role="group">
+                    <button type="submit" name="format" value="csv" class="btn btn-outline-primary btn-sm">
+                        Export CSV
+                    </button>
+                    <button type="submit" name="format" value="xlsx" class="btn btn-outline-primary btn-sm">
+                        Export Excel
+                    </button>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+
+    {% if details %}
+        <!-- 详细记录列表 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    Usage Details
+                    <span class="badge bg-secondary ms-2">{{ details.total }} records</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for record in details.items %}
+                    <div class="usage-record">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <div class="fw-bold">{{ record.occurTime|date('Y-m-d H:i:s') }}</div>
+                                {% if record.requestId %}
+                                    <small class="text-muted">{{ record.requestId }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                {% if record.model %}
+                                    <span class="badge bg-info">{{ record.model }}</span>
+                                {% endif %}
+                                {% if record.feature %}
+                                    <br><small class="text-muted">{{ record.feature }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <div class="token-breakdown">
+                                    <div>Input: {{ record.inputTokens|number_format }}</div>
+                                    {% if record.cacheCreationInputTokens > 0 %}
+                                        <div>Cache Creation: {{ record.cacheCreationInputTokens|number_format }}</div>
+                                    {% endif %}
+                                    {% if record.cacheReadInputTokens > 0 %}
+                                        <div>Cache Read: {{ record.cacheReadInputTokens|number_format }}</div>
+                                    {% endif %}
+                                    <div>Output: {{ record.outputTokens|number_format }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <div class="fw-bold">{{ record.totalTokens|number_format }}</div>
+                                <small class="text-muted">total tokens</small>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                {% if record.endpoint %}
+                                    <small class="text-muted">{{ record.endpoint }}</small>
+                                {% endif %}
+                                {% if record.stopReason %}
+                                    <br><span class="badge bg-light text-dark">{{ record.stopReason }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        No usage records found for the specified criteria.
+                    </div>
+                {% endfor %}
+
+                <!-- 分页 -->
+                {% if details.total > details.limit %}
+                    <div class="pagination-wrapper">
+                        <nav aria-label="Usage records pagination">
+                            <ul class="pagination">
+                                {% set totalPages = (details.total / details.limit)|round(0, 'ceil') %}
+                                {% set currentPage = details.page %}
+
+                                <!-- 上一页 -->
+                                {% if currentPage > 1 %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ path('anthropic_token_usage_admin_query', app.request.query.all|merge({page: currentPage - 1})) }}">Previous</a>
+                                    </li>
+                                {% endif %}
+
+                                <!-- 页码 -->
+                                {% for page in range(max(1, currentPage - 2), min(totalPages, currentPage + 2)) %}
+                                    <li class="page-item {{ page == currentPage ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ path('anthropic_token_usage_admin_query', app.request.query.all|merge({page: page})) }}">{{ page }}</a>
+                                    </li>
+                                {% endfor %}
+
+                                <!-- 下一页 -->
+                                {% if currentPage < totalPages %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ path('anthropic_token_usage_admin_query', app.request.query.all|merge({page: currentPage + 1})) }}">Next</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% elseif dimensionId %}
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">No Data Found</h4>
+            <p>No usage data found for the specified {{ dimension == 'access_key' ? 'Access Key' : 'User' }} and date range.</p>
+            <hr>
+            <p class="mb-0">Try adjusting your search criteria or expanding the date range.</p>
+        </div>
+    {% else %}
+        <div class="alert alert-secondary" role="alert">
+            <h4 class="alert-heading">Ready to Query</h4>
+            <p>Enter an Access Key ID or User ID above to view detailed usage statistics and records.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function clearFilters() {
+            document.getElementById('models').selectedIndex = -1;
+            document.getElementById('features').selectedIndex = -1;
+            document.getElementById('start_date').value = '';
+            document.getElementById('end_date').value = '';
+        }
+
+        // 自动完成功能（如果需要）
+        document.addEventListener('DOMContentLoaded', function() {
+            const dimensionIdInput = document.getElementById('dimension_id');
+            const dimensionSelect = document.getElementById('dimension');
+
+            // 当维度改变时，更新占位符文本
+            dimensionSelect.addEventListener('change', function() {
+                if (this.value === 'access_key') {
+                    dimensionIdInput.placeholder = 'Enter Access Key ID';
+                } else {
+                    dimensionIdInput.placeholder = 'Enter User ID';
+                }
+            });
+        });
+    </script>
+{% endblock %}
