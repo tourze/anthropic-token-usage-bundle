@@ -4,6 +4,7 @@
   "type": "symfony-bundle",
   "license": "MIT",
   "require": {
+    "php": "^8.3",
     "doctrine/data-fixtures": "^2.0",
     "doctrine/dbal": "^4.0",
     "doctrine/doctrine-bundle": "^2.13",
@@ -34,6 +35,7 @@
     "tourze/doctrine-snowflake-bundle": "1.0.*",
     "tourze/doctrine-timestamp-bundle": "1.0.*",
     "tourze/easy-admin-menu-bundle": "1.0.*",
+    "tourze/http-forward-bundle": "1.0.*",
     "tourze/user-service-contracts": "1.*"
   },
   "require-dev": {

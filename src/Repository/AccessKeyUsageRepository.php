@@ -9,6 +9,7 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Tourze\AccessKeyBundle\Entity\AccessKey;
 use Tourze\AnthropicTokenUsageBundle\Entity\AccessKeyUsage;
+use Tourze\AnthropicTokenUsageBundle\ValueObject\UsageAggregationData;
 use Tourze\AnthropicTokenUsageBundle\ValueObject\UsageDetailQuery;
 use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
 
@@ -375,7 +376,7 @@ class AccessKeyUsageRepository extends ServiceEntityRepository
     /**
      * 获取指定时间范围内按 AccessKey 聚合的使用量数据
      *
-     * @return array<\Tourze\AnthropicTokenUsageBundle\ValueObject\UsageAggregationData>
+     * @return array<UsageAggregationData>
      */
     public function getAggregatedDataByAccessKey(
         \DateTimeInterface $fromTime,
@@ -400,8 +401,7 @@ class AccessKeyUsageRepository extends ServiceEntityRepository
 
         /** @var array<array<string, mixed>> $results */
         return array_map(
-            static fn (array $result): \Tourze\AnthropicTokenUsageBundle\ValueObject\UsageAggregationData =>
-                \Tourze\AnthropicTokenUsageBundle\ValueObject\UsageAggregationData::fromQueryResult($result),
+            static fn (array $result): UsageAggregationData => UsageAggregationData::fromQueryResult($result),
             $results
         );
     }

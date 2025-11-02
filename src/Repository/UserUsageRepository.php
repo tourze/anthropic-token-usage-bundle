@@ -9,6 +9,7 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Tourze\AnthropicTokenUsageBundle\Entity\UserUsage;
+use Tourze\AnthropicTokenUsageBundle\ValueObject\UsageAggregationData;
 use Tourze\AnthropicTokenUsageBundle\ValueObject\UsageDetailQuery;
 use Tourze\AnthropicTokenUsageBundle\ValueObject\UserStub;
 use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
@@ -346,7 +347,7 @@ class UserUsageRepository extends ServiceEntityRepository
     /**
      * 获取指定时间范围内按 User 聚合的使用量数据
      *
-     * @return array<\Tourze\AnthropicTokenUsageBundle\ValueObject\UsageAggregationData>
+     * @return array<UsageAggregationData>
      */
     public function getAggregatedDataByUser(
         \DateTimeInterface $fromTime,
@@ -371,8 +372,7 @@ class UserUsageRepository extends ServiceEntityRepository
 
         /** @var array<array<string, mixed>> $results */
         return array_map(
-            static fn (array $result): \Tourze\AnthropicTokenUsageBundle\ValueObject\UsageAggregationData =>
-                \Tourze\AnthropicTokenUsageBundle\ValueObject\UsageAggregationData::fromQueryResult($result),
+            static fn (array $result): UsageAggregationData => UsageAggregationData::fromQueryResult($result),
             $results
         );
     }

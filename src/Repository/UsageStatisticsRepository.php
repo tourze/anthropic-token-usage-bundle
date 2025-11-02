@@ -238,10 +238,7 @@ class UsageStatisticsRepository extends ServiceEntityRepository
             return 0;
         }
 
-        throw new \UnexpectedValueException(sprintf(
-            'Expected int, numeric string, or null, got %s',
-            get_debug_type($value)
-        ));
+        throw new \UnexpectedValueException(sprintf('Expected int, numeric string, or null, got %s', get_debug_type($value)));
     }
 
     /**

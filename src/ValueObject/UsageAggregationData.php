@@ -18,7 +18,8 @@ final readonly class UsageAggregationData
         public int $totalCacheReadInputTokens,
         public int $totalOutputTokens,
         public int $totalRequests,
-    ) {}
+    ) {
+    }
 
     /**
      * 从数据库查询结果数组创建实例
