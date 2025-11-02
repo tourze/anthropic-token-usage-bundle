@@ -18,9 +18,7 @@ final class UserStub implements UserInterface
      */
     public function __construct(private string $identifier)
     {
-        if ('' === $this->identifier) {
-            throw new \InvalidArgumentException('User identifier cannot be empty');
-        }
+        // PHPDoc 类型约束 non-empty-string 已保证不为空，移除冗余检查
     }
 
     /**

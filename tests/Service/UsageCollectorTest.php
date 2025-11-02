@@ -343,14 +343,11 @@ class UsageCollectorTest extends TestCase
             }
         };
 
-        $this->accessKey = new class () extends AccessKey {
-            protected ?string $id = 'ak_test_123';
-
-            public function getId(): ?string
-            {
-                return $this->id;
-            }
-        };
+        // 使用反射设置 AccessKey ID，避免重写 final 方法
+        $this->accessKey = new AccessKey();
+        $reflection = new \ReflectionProperty(AccessKey::class, 'id');
+        $reflection->setAccessible(true);
+        $reflection->setValue($this->accessKey, 'ak_test_123');
 
         $this->user = new class () implements UserInterface {
             public function getRoles(): array
@@ -396,7 +393,7 @@ class UsageCollectorTest extends TestCase
         $this->assertTrue($result);
         /** @phpstan-ignore method.notFound */
         $messages = $this->messageBus->getDispatchedMessages();
-        $this->assertIsArray($messages);
+        // 移除冗余的 assertIsArray,因为 getDispatchedMessages() 返回类型已明确为 array
         $this->assertCount(1, $messages);
 
         $message = $messages[0];
@@ -416,7 +413,7 @@ class UsageCollectorTest extends TestCase
         $this->assertTrue($result);
         /** @phpstan-ignore method.notFound */
         $messages = $this->messageBus->getDispatchedMessages();
-        $this->assertIsArray($messages);
+        // 移除冗余的 assertIsArray,因为 getDispatchedMessages() 返回类型已明确为 array
         $this->assertCount(1, $messages);
 
         $message = $messages[0];
@@ -433,7 +430,7 @@ class UsageCollectorTest extends TestCase
         $this->assertTrue($result);
         /** @phpstan-ignore method.notFound */
         $messages = $this->messageBus->getDispatchedMessages();
-        $this->assertIsArray($messages);
+        // 移除冗余的 assertIsArray,因为 getDispatchedMessages() 返回类型已明确为 array
         $this->assertCount(1, $messages);
 
         $message = $messages[0];
@@ -450,7 +447,7 @@ class UsageCollectorTest extends TestCase
         $this->assertTrue($result);
         /** @phpstan-ignore method.notFound */
         $messages = $this->messageBus->getDispatchedMessages();
-        $this->assertIsArray($messages);
+        // 移除冗余的 assertIsArray,因为 getDispatchedMessages() 返回类型已明确为 array
         $this->assertCount(1, $messages);
 
         $message = $messages[0];
@@ -476,7 +473,7 @@ class UsageCollectorTest extends TestCase
         // 验证错误日志记录
         /** @phpstan-ignore method.notFound */
         $logs = $this->logger->getLogs();
-        $this->assertIsArray($logs);
+        // 移除冗余的 assertIsArray,因为 getLogs() 返回类型已明确为 array
         /** @phpstan-ignore offsetAccess.nonOffsetAccessible */
         $errorLogs = array_filter($logs, fn ($log) => 'error' === $log[0]);
         $this->assertCount(1, $errorLogs);
@@ -494,11 +491,11 @@ class UsageCollectorTest extends TestCase
         // 确保同步保存成功（优雅降级）
         /** @phpstan-ignore method.notFound */
         $savedAccessKeyEntities = $this->accessKeyUsageRepository->getSavedEntities();
-        $this->assertIsArray($savedAccessKeyEntities);
+        // 移除冗余的 assertIsArray,因为 getSavedEntities() 返回类型已明确为 array
         $this->assertCount(1, $savedAccessKeyEntities);
         /** @phpstan-ignore method.notFound */
         $savedUserEntities = $this->userUsageRepository->getSavedEntities();
-        $this->assertIsArray($savedUserEntities);
+        // 移除冗余的 assertIsArray,因为 getSavedEntities() 返回类型已明确为 array
         $this->assertCount(1, $savedUserEntities);
     }
 
@@ -510,7 +507,7 @@ class UsageCollectorTest extends TestCase
 
         /** @phpstan-ignore method.notFound */
         $logs = $this->logger->getLogs();
-        $this->assertIsArray($logs);
+        // 移除冗余的 assertIsArray,因为 getLogs() 返回类型已明确为 array
         /** @phpstan-ignore offsetAccess.nonOffsetAccessible */
         $infoLogs = array_filter($logs, fn ($log) => 'info' === $log[0]);
         $this->assertCount(1, $infoLogs);
@@ -541,7 +538,7 @@ class UsageCollectorTest extends TestCase
         $this->assertEmpty($result->getFailures());
         /** @phpstan-ignore method.notFound */
         $messages = $this->messageBus->getDispatchedMessages();
-        $this->assertIsArray($messages);
+        // 移除冗余的 assertIsArray,因为 getDispatchedMessages() 返回类型已明确为 array
         $this->assertCount(3, $messages);
     }
 
@@ -590,7 +587,7 @@ class UsageCollectorTest extends TestCase
 
         /** @phpstan-ignore method.notFound */
         $logs = $this->logger->getLogs();
-        $this->assertIsArray($logs);
+        // 移除冗余的 assertIsArray,因为 getLogs() 返回类型已明确为 array
         /** @phpstan-ignore offsetAccess.nonOffsetAccessible */
         $infoLogs = array_filter($logs, fn ($log) => 'info' === $log[0]);
         $this->assertGreaterThanOrEqual(2, count($infoLogs));
@@ -651,17 +648,17 @@ class UsageCollectorTest extends TestCase
         // 验证同步保存
         /** @phpstan-ignore method.notFound */
         $savedAccessKeyEntities = $this->accessKeyUsageRepository->getSavedEntities();
-        $this->assertIsArray($savedAccessKeyEntities);
+        // 移除冗余的 assertIsArray,因为 getSavedEntities() 返回类型已明确为 array
         $this->assertCount(1, $savedAccessKeyEntities);
         /** @phpstan-ignore method.notFound */
         $savedUserEntities = $this->userUsageRepository->getSavedEntities();
-        $this->assertIsArray($savedUserEntities);
+        // 移除冗余的 assertIsArray,因为 getSavedEntities() 返回类型已明确为 array
         $this->assertCount(1, $savedUserEntities);
 
         // 消息总线不应该被调用（同步模式）
         /** @phpstan-ignore method.notFound */
         $messages = $this->messageBus->getDispatchedMessages();
-        $this->assertIsArray($messages);
+        // 移除冗余的 assertIsArray,因为 getDispatchedMessages() 返回类型已明确为 array
         $this->assertCount(0, $messages);
     }
 

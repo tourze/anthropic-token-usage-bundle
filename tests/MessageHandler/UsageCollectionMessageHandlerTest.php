@@ -445,12 +445,11 @@ class UsageCollectionMessageHandlerTest extends TestCase
 
         $message = new UsageCollectionMessage($usageData, 'ak_test_123', 'user_test_456', $metadata);
 
-        $accessKey = new class () extends AccessKey {
-            public function getId(): string
-            {
-                return 'ak_test_123';
-            }
-        };
+        // 使用反射设置 AccessKey ID，避免重写 final 方法
+        $accessKey = new AccessKey();
+        $reflection = new \ReflectionProperty(AccessKey::class, 'id');
+        $reflection->setAccessible(true);
+        $reflection->setValue($accessKey, 'ak_test_123');
 
         // Set up access key to be found
         // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
@@ -498,12 +497,11 @@ class UsageCollectionMessageHandlerTest extends TestCase
         $usageData = new AnthropicUsageData(200, 0, 0, 100);
         $message = new UsageCollectionMessage($usageData, 'ak_test_123', null, []);
 
-        $accessKey = new class () extends AccessKey {
-            public function getId(): string
-            {
-                return 'ak_test_123';
-            }
-        };
+        // 使用反射设置 AccessKey ID，避免重写 final 方法
+        $accessKey = new AccessKey();
+        $reflection = new \ReflectionProperty(AccessKey::class, 'id');
+        $reflection->setAccessible(true);
+        $reflection->setValue($accessKey, 'ak_test_123');
         // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
         $this->accessKeyFinder->returnValues['ak_test_123'] = $accessKey;
 
@@ -581,12 +579,11 @@ class UsageCollectionMessageHandlerTest extends TestCase
         $usageData = new AnthropicUsageData(100, 0, 0, 50);
         $message = new UsageCollectionMessage($usageData, 'ak_test_123', 'user_test_456', []);
 
-        $accessKey = new class () extends AccessKey {
-            public function getId(): string
-            {
-                return 'ak_test_123';
-            }
-        };
+        // 使用反射设置 AccessKey ID，避免重写 final 方法
+        $accessKey = new AccessKey();
+        $reflection = new \ReflectionProperty(AccessKey::class, 'id');
+        $reflection->setAccessible(true);
+        $reflection->setValue($accessKey, 'ak_test_123');
         // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
         $this->accessKeyFinder->returnValues['ak_test_123'] = $accessKey;
         // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
@@ -619,12 +616,11 @@ class UsageCollectionMessageHandlerTest extends TestCase
         $usageData = new AnthropicUsageData(100, 0, 0, 50);
         $message = new UsageCollectionMessage($usageData, 'ak_test_123', null, []);
 
-        $accessKey = new class () extends AccessKey {
-            public function getId(): string
-            {
-                return 'ak_test_123';
-            }
-        };
+        // 使用反射设置 AccessKey ID，避免重写 final 方法
+        $accessKey = new AccessKey();
+        $reflection = new \ReflectionProperty(AccessKey::class, 'id');
+        $reflection->setAccessible(true);
+        $reflection->setValue($accessKey, 'ak_test_123');
         // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
         $this->accessKeyFinder->returnValues['ak_test_123'] = $accessKey;
 
@@ -642,12 +638,11 @@ class UsageCollectionMessageHandlerTest extends TestCase
         $usageData = new AnthropicUsageData(100, 0, 0, 50);
         $message = new UsageCollectionMessage($usageData, 'ak_test_123', null, []);
 
-        $accessKey = new class () extends AccessKey {
-            public function getId(): string
-            {
-                return 'ak_test_123';
-            }
-        };
+        // 使用反射设置 AccessKey ID，避免重写 final 方法
+        $accessKey = new AccessKey();
+        $reflection = new \ReflectionProperty(AccessKey::class, 'id');
+        $reflection->setAccessible(true);
+        $reflection->setValue($accessKey, 'ak_test_123');
         // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
         $this->accessKeyFinder->returnValues['ak_test_123'] = $accessKey;
 
@@ -666,12 +661,11 @@ class UsageCollectionMessageHandlerTest extends TestCase
         $usageData = new AnthropicUsageData(100, 0, 0, 50);
         $message = new UsageCollectionMessage($usageData, 'ak_test_123', null, []);
 
-        $accessKey = new class () extends AccessKey {
-            public function getId(): string
-            {
-                return 'ak_test_123';
-            }
-        };
+        // 使用反射设置 AccessKey ID，避免重写 final 方法
+        $accessKey = new AccessKey();
+        $reflection = new \ReflectionProperty(AccessKey::class, 'id');
+        $reflection->setAccessible(true);
+        $reflection->setValue($accessKey, 'ak_test_123');
         // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
         $this->accessKeyFinder->returnValues['ak_test_123'] = $accessKey;
 

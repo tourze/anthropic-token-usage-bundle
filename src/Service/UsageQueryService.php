@@ -455,12 +455,12 @@ final readonly class UsageQueryService implements UsageQueryServiceInterface
         }
 
         // dataPoints 非空时 peakPoint 必定非空（已通过前面的空检查）
-        assert(null !== $peakPoint, 'Peak point must be set when data points exist');
+        // 移除冗余的 assert，因为逻辑保证 $peakPoint 不为 null
 
         return [
             'total_tokens' => $totalTokens,
             'total_requests' => $totalRequests,
-            'average_tokens_per_period' => count($dataPoints) > 0 ? $totalTokens / count($dataPoints) : 0,
+            'average_tokens_per_period' => $totalTokens / count($dataPoints), // 已确保非空，移除冗余检查
             'peak_usage' => $peakPoint->toArray(),
             'data_point_count' => count($dataPoints),
         ];

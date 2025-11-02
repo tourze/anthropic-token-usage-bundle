@@ -70,7 +70,7 @@ final class AccessKeyUsageRepositoryTest extends AbstractRepositoryTestCase
 
         $result = $repository->findTopConsumers($startDate, $endDate, 5);
 
-        $this->assertIsArray($result);
+        // 移除冗余的 assertIsArray,因为方法返回类型已明确为 array
         $this->assertGreaterThanOrEqual(0, count($result));
 
         if (count($result) > 0) {
@@ -131,7 +131,7 @@ final class AccessKeyUsageRepositoryTest extends AbstractRepositoryTestCase
 
         $result = $repository->findByQuery($query);
 
-        $this->assertIsArray($result);
+        // 移除冗余的 assertIsArray,因为方法返回类型已明确为 array<AccessKeyUsage>
         $this->assertGreaterThanOrEqual(0, count($result));
     }
 
@@ -155,7 +155,7 @@ final class AccessKeyUsageRepositoryTest extends AbstractRepositoryTestCase
 
         $result = $repository->countByQuery($query);
 
-        $this->assertIsInt($result);
+        // 移除冗余的 assertIsInt,因为方法返回类型已明确为 int
         $this->assertGreaterThanOrEqual(0, $result);
     }
 
@@ -173,18 +173,20 @@ final class AccessKeyUsageRepositoryTest extends AbstractRepositoryTestCase
 
         $result = $repository->calculateStatistics($accessKey, $startDate, $endDate);
 
-        $this->assertIsArray($result);
+        // 移除冗余的 assertIsArray,因为方法返回类型已明确为 array
         $this->assertArrayHasKey('total_input_tokens', $result);
         $this->assertArrayHasKey('total_cache_creation_input_tokens', $result);
         $this->assertArrayHasKey('total_cache_read_input_tokens', $result);
         $this->assertArrayHasKey('total_output_tokens', $result);
         $this->assertArrayHasKey('total_requests', $result);
 
-        $this->assertIsInt($result['total_input_tokens']);
-        $this->assertIsInt($result['total_cache_creation_input_tokens']);
-        $this->assertIsInt($result['total_cache_read_input_tokens']);
-        $this->assertIsInt($result['total_output_tokens']);
-        $this->assertIsInt($result['total_requests']);
+        // 移除冗余的 assertIsInt,因为 formatStatisticsResult() 已确保所有值为 int
+        // 使用更有意义的断言来验证业务逻辑
+        $this->assertGreaterThanOrEqual(0, $result['total_input_tokens']);
+        $this->assertGreaterThanOrEqual(0, $result['total_cache_creation_input_tokens']);
+        $this->assertGreaterThanOrEqual(0, $result['total_cache_read_input_tokens']);
+        $this->assertGreaterThanOrEqual(0, $result['total_output_tokens']);
+        $this->assertGreaterThanOrEqual(0, $result['total_requests']);
     }
 
     public function testCountActiveEntities(): void
@@ -199,7 +201,7 @@ final class AccessKeyUsageRepositoryTest extends AbstractRepositoryTestCase
 
         $result = $repository->countActiveEntities($startDate, $endDate);
 
-        $this->assertIsInt($result);
+        // 移除冗余的 assertIsInt,因为方法返回类型已明确为 int
         $this->assertGreaterThanOrEqual(0, $result);
     }
 }

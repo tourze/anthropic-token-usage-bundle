@@ -103,8 +103,11 @@ final class HttpForwardEventSubscriberTest extends AbstractEventSubscriberTestCa
 
         $this->subscriber->onAfterForward($event);
 
-        $this->assertMockCallsCount($initialCallsCount);
-        $this->assertTrue(true); // 明确添加断言以满足 PHPStan 要求
+        // 验证非成功响应不会触发 usage 收集
+        // @phpstan-ignore property.notFound
+        $calls = $this->mockUsageCollector->calls;
+        // 移除冗余的 assertIsArray,因为 $calls 属性已明确声明为 array 类型
+        $this->assertCount($initialCallsCount, $calls);
     }
 
     public function testOnAfterForwardWithNonAnthropicApi(): void
@@ -119,8 +122,11 @@ final class HttpForwardEventSubscriberTest extends AbstractEventSubscriberTestCa
 
         $this->subscriber->onAfterForward($event);
 
-        $this->assertMockCallsCount($initialCallsCount);
-        $this->assertTrue(true); // 明确添加断言以满足 PHPStan 要求
+        // 验证非 Anthropic API 路径不会触发 usage 收集
+        // @phpstan-ignore property.notFound
+        $calls = $this->mockUsageCollector->calls;
+        // 移除冗余的 assertIsArray,因为 $calls 属性已明确声明为 array 类型
+        $this->assertCount($initialCallsCount, $calls);
     }
 
     public function testOnAfterForwardWithAnthropicApiAndUsageData(): void
@@ -151,8 +157,11 @@ final class HttpForwardEventSubscriberTest extends AbstractEventSubscriberTestCa
 
         $this->subscriber->onAfterForward($event);
 
-        $this->assertMockCallsCount($initialCallsCount + 1);
-        $this->assertTrue(true); // 明确添加断言以满足 PHPStan 要求
+        // 验证 Anthropic API 响应成功触发 usage 收集
+        // @phpstan-ignore property.notFound
+        $calls = $this->mockUsageCollector->calls;
+        // 移除冗余的 assertIsArray,因为 $calls 属性已明确声明为 array 类型
+        $this->assertCount($initialCallsCount + 1, $calls);
     }
 
     public function testOnAfterForwardWithEmptyResponse(): void
@@ -166,10 +175,12 @@ final class HttpForwardEventSubscriberTest extends AbstractEventSubscriberTestCa
 
         $this->subscriber->onAfterForward($event);
 
-        // 验证UsageCollector没有被调用（因为响应为空）
-        $this->assertMockCallsCount($initialUsageCallsCount);
+        // 验证 UsageCollector 没有被调用（因为响应为空）
+        // @phpstan-ignore property.notFound
+        $calls = $this->mockUsageCollector->calls;
+        // 移除冗余的 assertIsArray,因为 $calls 属性已明确声明为 array 类型
+        $this->assertCount($initialUsageCallsCount, $calls);
         // 注意：不再验证logger调用，因为我们不控制WithMonologChannel配置的logger
-        $this->assertTrue(true); // 明确添加断言以满足 PHPStan 要求
     }
 
     public function testOnAfterForwardWithStreamResponse(): void
@@ -191,8 +202,11 @@ final class HttpForwardEventSubscriberTest extends AbstractEventSubscriberTestCa
 
         $this->subscriber->onAfterForward($event);
 
-        $this->assertMockCallsCount($initialCallsCount + 1);
-        $this->assertTrue(true); // 明确添加断言以满足 PHPStan 要求
+        // 验证流式响应成功触发 usage 收集
+        // @phpstan-ignore property.notFound
+        $calls = $this->mockUsageCollector->calls;
+        // 移除冗余的 assertIsArray,因为 $calls 属性已明确声明为 array 类型
+        $this->assertCount($initialCallsCount + 1, $calls);
     }
 
     /**
@@ -206,18 +220,5 @@ final class HttpForwardEventSubscriberTest extends AbstractEventSubscriberTestCa
         $calls = $this->mockUsageCollector->calls;
         $this->assertIsArray($calls);
         return count($calls);
-    }
-
-    /**
-     * 类型安全地断言 mock collector 调用次数
-     *
-     * @phpstan-impure
-     */
-    private function assertMockCallsCount(int $expectedCount): void
-    {
-        // @phpstan-ignore property.notFound
-        $calls = $this->mockUsageCollector->calls;
-        $this->assertIsArray($calls);
-        $this->assertCount($expectedCount, $calls);
     }
 }

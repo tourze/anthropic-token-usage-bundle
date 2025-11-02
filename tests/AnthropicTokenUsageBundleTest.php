@@ -13,7 +13,6 @@ use Tourze\PHPUnitSymfonyKernelTest\AbstractBundleTestCase;
  * AnthropicTokenUsageBundle 集成测试
  * 验证Bundle的基本注册和依赖关系
  * @internal
- * @phpstan-ignore symplify.forbiddenExtendOfNonAbstractClass
  */
 #[CoversClass(AnthropicTokenUsageBundle::class)]
 #[RunTestsInSeparateProcesses]
@@ -40,7 +39,7 @@ final class AnthropicTokenUsageBundleTest extends AbstractBundleTestCase
     {
         $dependencies = AnthropicTokenUsageBundle::getBundleDependencies();
 
-        $this->assertIsArray($dependencies);
+        // 移除冗余的 assertIsArray，因为返回类型已确定为 array
         $this->assertNotEmpty($dependencies, 'Bundle应该声明依赖关系');
 
         // 验证核心依赖存在

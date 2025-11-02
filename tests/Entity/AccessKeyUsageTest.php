@@ -28,12 +28,13 @@ class AccessKeyUsageTest extends AbstractEntityTestCase
     protected function setUp(): void
     {
         $this->accessKeyUsage = new AccessKeyUsage();
-        $this->accessKey = new class () extends AccessKey {
-            public function getId(): string
-            {
-                return 'ak_test_123';
-            }
-        };
+
+        // 使用反射设置 AccessKey ID，避免重写 final 方法
+        $this->accessKey = new AccessKey();
+        $reflection = new \ReflectionProperty(AccessKey::class, 'id');
+        $reflection->setAccessible(true);
+        $reflection->setValue($this->accessKey, 'ak_test_123');
+
         $this->user = new class () implements UserInterface {
             public function getRoles(): array
             {
@@ -58,12 +59,11 @@ class AccessKeyUsageTest extends AbstractEntityTestCase
 
     public static function propertiesProvider(): iterable
     {
-        $accessKey = new class () extends AccessKey {
-            public function getId(): string
-            {
-                return 'ak_test_123';
-            }
-        };
+        // 使用反射设置 AccessKey ID，避免重写 final 方法
+        $accessKey = new AccessKey();
+        $reflection = new \ReflectionProperty(AccessKey::class, 'id');
+        $reflection->setAccessible(true);
+        $reflection->setValue($accessKey, 'ak_test_123');
 
         $user = new class () implements UserInterface {
             public function getRoles(): array

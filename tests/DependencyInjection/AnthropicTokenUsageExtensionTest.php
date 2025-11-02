@@ -44,15 +44,20 @@ final class AnthropicTokenUsageExtensionTest extends AbstractDependencyInjection
         $this->assertEquals('anthropic_token_usage', $this->extension->getAlias());
     }
 
+    /**
+     * 测试 load 方法可以正常执行
+     *
+     * 此测试验证 load() 方法可以正常执行而不抛出异常。
+     * 移除了原有的冗余断言 assertTrue(true)，该断言总是为真，无实际验证价值。
+     */
     public function testLoad(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $container = new ContainerBuilder();
         $container->setParameter('kernel.environment', 'test');
         $container->setParameter('kernel.project_dir', __DIR__ . '/../../..');
 
         $this->extension->load([], $container);
-
-        // 验证 load 方法执行成功
-        $this->assertTrue(true);
     }
 }
