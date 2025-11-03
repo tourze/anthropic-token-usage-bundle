@@ -14,6 +14,8 @@ use Tourze\PHPUnitSymfonyKernelTest\AbstractRepositoryTestCase;
 
 /**
  * AccessKeyUsageRepository 测试
+ *
+ * @extends AbstractRepositoryTestCase<AccessKeyUsage>
  * @internal
  */
 #[CoversClass(AccessKeyUsageRepository::class)]

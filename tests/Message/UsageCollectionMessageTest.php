@@ -64,8 +64,6 @@ final class UsageCollectionMessageTest extends TestCase
         );
 
         $messageId = $message->getMessageId();
-
-        $this->assertIsString($messageId);
         $this->assertSame(32, strlen($messageId)); // MD5哈希长度
 
         // 相同参数应该产生相同的ID
@@ -176,8 +174,6 @@ final class UsageCollectionMessageTest extends TestCase
         );
 
         $array = $message->toArray();
-
-        $this->assertIsArray($array);
         $this->assertSame($message->getMessageId(), $array['message_id']);
         $this->assertSame('usage_collection', $array['message_type']);
         $this->assertSame('ak-123', $array['access_key_id']);

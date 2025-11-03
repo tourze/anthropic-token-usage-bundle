@@ -12,6 +12,8 @@ use Tourze\PHPUnitSymfonyKernelTest\AbstractRepositoryTestCase;
 
 /**
  * UsageStatisticsRepository 测试
+ *
+ * @extends AbstractRepositoryTestCase<UsageStatistics>
  * @internal
  */
 #[CoversClass(UsageStatisticsRepository::class)]

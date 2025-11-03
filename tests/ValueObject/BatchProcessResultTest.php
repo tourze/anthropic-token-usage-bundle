@@ -88,8 +88,6 @@ final class BatchProcessResultTest extends TestCase
         );
 
         $array = $result->toArray();
-
-        $this->assertIsArray($array);
         $this->assertArrayHasKey('total_items', $array);
         $this->assertArrayHasKey('success_count', $array);
         $this->assertArrayHasKey('is_fully_successful', $array);

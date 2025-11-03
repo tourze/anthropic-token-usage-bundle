@@ -78,8 +78,6 @@ final class TopConsumerItemTest extends TestCase
         );
 
         $array = $item->toArray();
-
-        $this->assertIsArray($array);
         $this->assertArrayHasKey('dimension_id', $array);
         $this->assertArrayHasKey('total_tokens', $array);
     }

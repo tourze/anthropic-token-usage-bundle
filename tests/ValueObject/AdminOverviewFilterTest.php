@@ -61,8 +61,6 @@ final class AdminOverviewFilterTest extends TestCase
     {
         $filter = new AdminOverviewFilter();
         $dateRange = $filter->getEffectiveDateRange();
-
-        $this->assertIsArray($dateRange);
         $this->assertArrayHasKey('start', $dateRange);
         $this->assertArrayHasKey('end', $dateRange);
         $this->assertInstanceOf(\DateTimeInterface::class, $dateRange['start']);
@@ -107,8 +105,6 @@ final class AdminOverviewFilterTest extends TestCase
         );
 
         $array = $filter->toArray();
-
-        $this->assertIsArray($array);
         $this->assertArrayHasKey('start_date', $array);
         $this->assertArrayHasKey('end_date', $array);
         $this->assertArrayHasKey('aggregation_period', $array);

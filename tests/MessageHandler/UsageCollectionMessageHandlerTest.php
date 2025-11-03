@@ -47,7 +47,6 @@ use Tourze\AnthropicTokenUsageBundle\ValueObject\AnthropicUsageData;
  * UsageCollectionMessageHandler 消息处理器单元测试
  * 测试重点：消息处理逻辑、数据持久化、错误处理
  * @internal
- * @phpstan-ignore-next-line
  */
 #[CoversClass(UsageCollectionMessageHandler::class)]
 class UsageCollectionMessageHandlerTest extends TestCase
@@ -64,12 +63,8 @@ class UsageCollectionMessageHandlerTest extends TestCase
 
     private LoggerInterface $logger;
 
-    /**
-     * @phpstan-ignore-next-line
-     */
     protected function setUp(): void
     {
-        /** @phpstan-ignore-next-line */
         $this->entityManager = new class () implements EntityManagerInterface {
             /** @var list<array{0: string}> */
             public array $calls = [];
@@ -452,7 +447,7 @@ class UsageCollectionMessageHandlerTest extends TestCase
         $reflection->setValue($accessKey, 'ak_test_123');
 
         // Set up access key to be found
-        // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
+        // @phpstan-ignore property.notFound
         $this->accessKeyFinder->returnValues['ak_test_123'] = $accessKey;
 
         $this->handler->__invoke($message);
@@ -502,7 +497,7 @@ class UsageCollectionMessageHandlerTest extends TestCase
         $reflection = new \ReflectionProperty(AccessKey::class, 'id');
         $reflection->setAccessible(true);
         $reflection->setValue($accessKey, 'ak_test_123');
-        // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
+        // @phpstan-ignore property.notFound
         $this->accessKeyFinder->returnValues['ak_test_123'] = $accessKey;
 
         $this->handler->__invoke($message);
@@ -584,11 +579,11 @@ class UsageCollectionMessageHandlerTest extends TestCase
         $reflection = new \ReflectionProperty(AccessKey::class, 'id');
         $reflection->setAccessible(true);
         $reflection->setValue($accessKey, 'ak_test_123');
-        // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
+        // @phpstan-ignore property.notFound
         $this->accessKeyFinder->returnValues['ak_test_123'] = $accessKey;
-        // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
+        // @phpstan-ignore property.notFound
         $this->accessKeyUsageRepository->shouldThrowException = true;
-        // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
+        // @phpstan-ignore property.notFound
         $this->accessKeyUsageRepository->exceptionMessage = 'Database error';
 
         $this->expectException(\RuntimeException::class);
@@ -621,7 +616,7 @@ class UsageCollectionMessageHandlerTest extends TestCase
         $reflection = new \ReflectionProperty(AccessKey::class, 'id');
         $reflection->setAccessible(true);
         $reflection->setValue($accessKey, 'ak_test_123');
-        // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
+        // @phpstan-ignore property.notFound
         $this->accessKeyFinder->returnValues['ak_test_123'] = $accessKey;
 
         $beforeProcessing = new \DateTimeImmutable();
@@ -643,7 +638,7 @@ class UsageCollectionMessageHandlerTest extends TestCase
         $reflection = new \ReflectionProperty(AccessKey::class, 'id');
         $reflection->setAccessible(true);
         $reflection->setValue($accessKey, 'ak_test_123');
-        // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
+        // @phpstan-ignore property.notFound
         $this->accessKeyFinder->returnValues['ak_test_123'] = $accessKey;
 
         $this->handler->__invoke($message);
@@ -666,7 +661,7 @@ class UsageCollectionMessageHandlerTest extends TestCase
         $reflection = new \ReflectionProperty(AccessKey::class, 'id');
         $reflection->setAccessible(true);
         $reflection->setValue($accessKey, 'ak_test_123');
-        // @phpstan-ignore property.notFound, offsetAccess.nonOffsetAccessible
+        // @phpstan-ignore property.notFound
         $this->accessKeyFinder->returnValues['ak_test_123'] = $accessKey;
 
         $startTime = microtime(true);

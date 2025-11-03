@@ -32,7 +32,6 @@ use Tourze\AnthropicTokenUsageBundle\ValueObject\UsageCollectionItem;
  * 这是合理的单元测试实践，因为需要精确控制依赖行为以测试各种边界场景。
  *
  * @internal
- * @phpstan-ignore-next-line 测试用例 Tourze\AnthropicTokenUsageBundle\Tests\Unit\Service\UsageCollectorTest 的测试目标 Tourze\AnthropicTokenUsageBundle\Service\UsageCollector 是一个服务，因此不应直接继承自 PHPUnit\Framework\TestCase。
  */
 #[CoversClass(UsageCollector::class)]
 class UsageCollectorTest extends TestCase
@@ -474,12 +473,10 @@ class UsageCollectorTest extends TestCase
         /** @phpstan-ignore method.notFound */
         $logs = $this->logger->getLogs();
         // 移除冗余的 assertIsArray,因为 getLogs() 返回类型已明确为 array
-        /** @phpstan-ignore offsetAccess.nonOffsetAccessible */
         $errorLogs = array_filter($logs, fn ($log) => 'error' === $log[0]);
         $this->assertCount(1, $errorLogs);
         $errorLogsArray = array_values($errorLogs);
         $this->assertArrayHasKey(0, $errorLogsArray);
-        /** @phpstan-ignore offsetAccess.nonOffsetAccessible */
         $firstErrorLog = $errorLogsArray[0];
         $this->assertIsArray($firstErrorLog);
         $this->assertArrayHasKey(1, $firstErrorLog);
@@ -508,12 +505,10 @@ class UsageCollectorTest extends TestCase
         /** @phpstan-ignore method.notFound */
         $logs = $this->logger->getLogs();
         // 移除冗余的 assertIsArray,因为 getLogs() 返回类型已明确为 array
-        /** @phpstan-ignore offsetAccess.nonOffsetAccessible */
         $infoLogs = array_filter($logs, fn ($log) => 'info' === $log[0]);
         $this->assertCount(1, $infoLogs);
         $infoLogsArray = array_values($infoLogs);
         $this->assertArrayHasKey(0, $infoLogsArray);
-        /** @phpstan-ignore offsetAccess.nonOffsetAccessible */
         $firstInfoLog = $infoLogsArray[0];
         $this->assertIsArray($firstInfoLog);
         $this->assertArrayHasKey(1, $firstInfoLog);
@@ -588,14 +583,12 @@ class UsageCollectorTest extends TestCase
         /** @phpstan-ignore method.notFound */
         $logs = $this->logger->getLogs();
         // 移除冗余的 assertIsArray,因为 getLogs() 返回类型已明确为 array
-        /** @phpstan-ignore offsetAccess.nonOffsetAccessible */
         $infoLogs = array_filter($logs, fn ($log) => 'info' === $log[0]);
         $this->assertGreaterThanOrEqual(2, count($infoLogs));
 
         // 检查开始日志
         $infoLogsArray = array_values($infoLogs);
         $this->assertArrayHasKey(0, $infoLogsArray);
-        /** @phpstan-ignore offsetAccess.nonOffsetAccessible */
         $firstInfoLog = $infoLogsArray[0];
         $this->assertIsArray($firstInfoLog);
         $this->assertArrayHasKey(1, $firstInfoLog);
