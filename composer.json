@@ -29,13 +29,13 @@
     "symfony/security-http": "^7.3",
     "symfony/validator": "^7.3",
     "symfony/yaml": "^7.3",
-    "tourze/access-key-bundle": "1.0.*|1.1.*",
+    "tourze/access-key-bundle": "1.0.*",
     "tourze/bundle-dependency": "1.*",
-    "tourze/doctrine-indexed-bundle": "1.0.*|1.1.*",
-    "tourze/doctrine-snowflake-bundle": "1.0.*|1.1.*",
-    "tourze/doctrine-timestamp-bundle": "1.0.*|1.1.*",
+    "tourze/doctrine-indexed-bundle": "1.0.*",
+    "tourze/doctrine-snowflake-bundle": "1.1.*",
+    "tourze/doctrine-timestamp-bundle": "1.1.*",
     "tourze/easy-admin-menu-bundle": "1.0.*",
-    "tourze/http-forward-bundle": "1.0.*|1.1.*",
+    "tourze/http-forward-bundle": "1.0.*",
     "tourze/user-service-contracts": "1.1.*"
   },
   "require-dev": {
