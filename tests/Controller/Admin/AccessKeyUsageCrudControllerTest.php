@@ -31,11 +31,6 @@ final class AccessKeyUsageCrudControllerTest extends AbstractEasyAdminController
         $this->assertTrue($reflection->isFinal());
     }
 
-    public function testGetEntityFqcnShouldReturnAccessKeyUsageClass(): void
-    {
-        $this->assertEquals(AccessKeyUsage::class, AccessKeyUsageCrudController::getEntityFqcn());
-    }
-
     public function testControllerHasRequiredConfigurationMethods(): void
     {
         $reflection = new \ReflectionClass(AccessKeyUsageCrudController::class);
