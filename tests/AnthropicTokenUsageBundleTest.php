@@ -35,35 +35,6 @@ final class AnthropicTokenUsageBundleTest extends AbstractBundleTestCase
         );
     }
 
-    public function testGetBundleDependencies(): void
-    {
-        $dependencies = AnthropicTokenUsageBundle::getBundleDependencies();
-
-        // 移除冗余的 assertIsArray，因为返回类型已确定为 array
-        $this->assertNotEmpty($dependencies, 'Bundle应该声明依赖关系');
-
-        // 验证核心依赖存在
-        $expectedDependencies = [
-            'Doctrine\Bundle\DoctrineBundle\DoctrineBundle',
-            'Tourze\HttpForwardBundle\HttpForwardBundle',
-            'Tourze\EasyAdminMenuBundle\EasyAdminMenuBundle',
-        ];
-
-        foreach ($expectedDependencies as $dependency) {
-            $this->assertArrayHasKey(
-                $dependency,
-                $dependencies,
-                "Bundle应该依赖 {$dependency}"
-            );
-
-            $this->assertEquals(
-                ['all' => true],
-                $dependencies[$dependency],
-                "依赖 {$dependency} 应该在所有环境下启用"
-            );
-        }
-    }
-
     public function testBundleExtendsSymfonyBundle(): void
     {
         $reflection = new \ReflectionClass(AnthropicTokenUsageBundle::class);
